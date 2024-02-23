@@ -48,7 +48,7 @@ const TextComponent = () => {
       if (!flag) {
         setRoom(room);
         createSpans(text);
-        startCountDown(1, () => {
+        startCountDown(3, () => {
           startTimer();
           setFlag(true);
         });
@@ -78,7 +78,7 @@ const TextComponent = () => {
 
   const startTimer = () => {
     clearInterval(countDownRef.current);
-    setCurrentTime(10);
+    setCurrentTime(60);
     time.current.textContent = currentTime;
     const intervalId = setInterval(() => {
       setCurrentTime((prev) => {
@@ -97,7 +97,7 @@ const TextComponent = () => {
     if (!flag) {
       socket.emit("startGame", room.roomId);
       createSpans(text);
-      startCountDown(1, () => {
+      startCountDown(3, () => {
         startTimer();
         setFlag(true);
       });
@@ -108,8 +108,7 @@ const TextComponent = () => {
     if (!countdownFinished) return;
 
     if (currentTime <= 0) {
-      setGameOver(true);
-
+      // setGameOver(true);
       return;
     }
 
@@ -203,7 +202,7 @@ const TextComponent = () => {
 
     if (currentIndex === len) {
       socket.emit("playerFinished", room.roomId, myName, currentTime);
-      setGameOver(true);
+      // setGameOver(true);
     }
 
     setMyStats((prev) => {

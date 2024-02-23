@@ -15,6 +15,11 @@ const Landing = () => {
       console.log("Connected to the server");
     });
 
+    socket.on("nameTaken", (msg) => {
+      toast.error(msg);
+      console.log(msg);
+    })
+
     
     socket.on("roomBusy", (msg) => {
       toast.error(msg);

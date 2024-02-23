@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-const alphabet = "abcdefghijklmnopqrstuvwxyz";
+import { generateRoomId, generateRandomString } from "./utils/utils.js";
 
 const port = 3000;
 const app = express();
@@ -18,43 +18,33 @@ app.use((req, res, next) => {
 
 const rooms = {};
 
-
 app.get("/results/:roomId", (req, res) => {
   const roomId = req.params.roomId;
   const room = rooms[roomId];
-  console.log('fetching');
   if (!room) {
     return res.status(404).json({ message: "Room not found" });
   }
- 
-  const results = room.players.map((player) => {
-    let finishTime = 60 - player.finishTime;
-    let errors = player.errors;
-    finishTime += errors;
-    const accuracy = ((player.charactersTyped / player.errors) * 100).toFixed(2);
-    const speed = (player.charactersTyped / 5 / 60).toFixed(2);
-    const name = player.name;
+  const results = [];
 
-    return { 
-      name,
-      finishTime,
-      speed,
-      accuracy,
-      errors
-     };
+  room.players.forEach((player) => {
+    const time = player.finished ? 60 - player.finishTime : 60;
+    const charsPerSec = player.charactersTyped / time;
+    const wpm = (charsPerSec * 60) / 5;
+    console.log(time, charsPerSec);
+    results.push({
+      name: player.name,
+      finishTime: player.finished ? time : "DNF",
+      errors: player.errors,
+      accuracy: (
+        ((player.charactersTyped - player.errors) / player.charactersTyped) *
+        100
+      ).toFixed(2),
+      speed: wpm.toFixed(2),
+    });
   });
 
-  // Sort the results by finish time in ascending order
-  results.sort((a, b) => a.finishTime - b.finishTime);
-
-  // Send the results back to the frontend
-  res.json( results );
+  res.json(results);
 });
-
-const generateRoomId = () => {
-  const startIndex = Math.floor(Math.random() * (alphabet.length - 3)); // Ensure room id length is 4
-  return alphabet.substring(startIndex, startIndex + 4);
-};
 
 const io = new Server(server, {
   cors: {
@@ -76,10 +66,10 @@ io.on("connection", (socket) => {
   });
 
   // Create a new room
-  socket.on("createRoom", (pName) => {
+  socket.on("createRoom", (playerName) => {
     const roomId = generateRoomId();
-
-    const playerName = pName;
+    const str = generateRandomString();
+    // const playerName = pName;
 
     const room = {
       roomId: roomId,
@@ -95,8 +85,8 @@ io.on("connection", (socket) => {
           errors: 0,
         },
       ],
-      // text: "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempoLorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec velit nec nulla fermentum congue. Cras eleifend tortor sed justo sollicitudin, nec tempus lorem commodo. Vivamus nec velit non eros dapibus eleifend.",
-      text: "lorem commodo. Vivamus nec velit non eros dapibus eleifend.",
+
+      text: str,
     };
     // Add the room to the rooms object
     rooms[roomId] = room;
@@ -108,18 +98,25 @@ io.on("connection", (socket) => {
   });
 
   // Join an existing room
-  socket.on("joinRoom", (roomId, pName) => {
+  socket.on("joinRoom", (roomId, playerName) => {
     // Check if the room exists
     if (rooms[roomId]) {
       if (rooms[roomId].gameStarted == true) {
-        console.log("someone tried to join a room that already started a game");
+        console.log("someone tried to join a busy room");
         socket.emit("roomBusy", "Game already started in this room");
         return;
       }
       // Join the room
       socket.join(roomId);
 
-      const playerName = pName;
+      // Check if the player name is already taken
+      if (rooms[roomId].players.some((player) => player.name === playerName)) {
+        // console.log("Player name is already taken");
+        socket.emit("nameTaken", "Name taken. Pick another.");
+        return;
+      }
+
+      // const playerName = pName;
       rooms[roomId].players.push({
         name: playerName,
         progress: 0,
@@ -149,7 +146,7 @@ io.on("connection", (socket) => {
           player.finishTime = 0;
         }
       });
-      console.log(rooms[roomId].players);
+      // console.log(rooms[roomId].players);
       io.to(roomId).emit("gameOver", rooms[roomId]);
     }
   });
@@ -163,14 +160,13 @@ io.on("connection", (socket) => {
         }
       });
 
+      io.to(roomId).emit("playerFinished", rooms[roomId], user);
       const allFinished = rooms[roomId].players.every(
         (player) => player.finished
       );
       if (allFinished) {
         io.to(roomId).emit("allFinished", rooms[roomId]);
       }
-
-      io.to(roomId).emit("playerFinished", rooms[roomId], user);
     }
   });
 
@@ -184,18 +180,15 @@ io.on("connection", (socket) => {
       rooms[roomId].players.forEach((player) => {
         if (player.name === user) {
           player.progress = progress;
-          if(event === "error -1"){
+          if (event === "error -1") {
             player.errors--;
             player.charactersTyped--;
-          }
-          else if(event === "error +1"){
+          } else if (event === "error +1") {
             player.errors++;
             player.charactersTyped++;
-          }
-          else if(event === "correct +1"){
+          } else if (event === "correct +1") {
             player.charactersTyped++;
-          }
-          else if(event === "correct -1"){
+          } else if (event === "correct -1") {
             player.charactersTyped--;
           }
         }
