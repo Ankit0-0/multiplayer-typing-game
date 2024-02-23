@@ -2,11 +2,10 @@ import React, { useEffect, useState, useRef } from "react";
 import { allAlphabets } from "../assets/data.js";
 import { myContext } from "../context/context.jsx";
 // import { io } from "socket.io-client";
-// import { toast } from "react-toastify";
+
 import { useNavigate } from "react-router-dom";
 
 const TextComponent = () => {
-  // const [startTime, setStartTime] = useState(1);
 
   const navigate = useNavigate();
 
