@@ -23,8 +23,11 @@ app.get("/results/:roomId", (req, res) => {
   const roomId = req.params.roomId;
   const room = rooms[roomId];
   console.log('fetching');
+  if (!room) {
+    return res.status(404).json({ message: "Room not found" });
+  }
  
-  const results = room.players.map((player) => { 
+  const results = room.players.map((player) => {
     let finishTime = 60 - player.finishTime;
     let errors = player.errors;
     finishTime += errors;
@@ -172,15 +175,29 @@ io.on("connection", (socket) => {
   });
 
   // Update the live count in a room
-  socket.on("updateProgress", (roomId, user, charactersTyped) => {
+  socket.on("updateProgress", (roomId, user, index, event) => {
     // console.log("Updating progress");
     // Check if the room exists
 
     if (rooms[roomId]) {
-      const progress = (charactersTyped / rooms[roomId].text.length) * 100;
+      const progress = (index / rooms[roomId].text.length) * 100;
       rooms[roomId].players.forEach((player) => {
         if (player.name === user) {
           player.progress = progress;
+          if(event === "error -1"){
+            player.errors--;
+            player.charactersTyped--;
+          }
+          else if(event === "error +1"){
+            player.errors++;
+            player.charactersTyped++;
+          }
+          else if(event === "correct +1"){
+            player.charactersTyped++;
+          }
+          else if(event === "correct -1"){
+            player.charactersTyped--;
+          }
         }
       });
 

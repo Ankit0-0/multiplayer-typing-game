@@ -22,11 +22,11 @@ const Home = () => {
     setLeaderboard,
   } = myContext();
 
-  useEffect(() => {
-    if (gameOver && leaderBoard) {
-      navigate("/results");
-    }
-  }, [gameOver, leaderBoard]);
+  // useEffect(() => {
+  //   if (gameOver && leaderBoard) {
+  //     navigate("/results");
+  //   }
+  // }, [gameOver, leaderBoard]);
 
   // useEffect(() => { // not working, need to fix
   //   if (!room) {
@@ -40,37 +40,37 @@ const Home = () => {
       console.log("A new user joined this room", room);
     });
 
-    const findResults = (players) => {
-      const updatedPlayers = players.map((player) => {
-        let finishTime = 60 - player.finishTime; // Adjust finish time
-        let errors = player.errors.length; // Number of errors
-        finishTime += errors; // Add errors to finish time
-        return { ...player, finishTime: finishTime };
-      });
+    // const findResults = (players) => {
+    //   const updatedPlayers = players.map((player) => {
+    //     let finishTime = 60 - player.finishTime; // Adjust finish time
+    //     let errors = player.errors.length; // Number of errors
+    //     finishTime += errors; // Add errors to finish time
+    //     return { ...player, finishTime: finishTime };
+    //   });
 
-      // Sort players by finish time in ascending order
-      updatedPlayers.sort((a, b) => a.finishTime - b.finishTime);
-      console.log(updatedPlayers);
-      setLeaderboard((prev) => {
-        console.log("Chal rha haai");
-        return [...updatedPlayers];
-      });
-      navigate("/results");
-      setGameOver(true);
-    };
+    //   // Sort players by finish time in ascending order
+    //   updatedPlayers.sort((a, b) => a.finishTime - b.finishTime);
+    //   console.log(updatedPlayers);
+    //   setLeaderboard((prev) => {
+    //     // console.log("Chal rha haai");
+    //     return [...updatedPlayers];
+    //   });
+    //   navigate("/results");
+    //   setGameOver(true);
+    // };
 
     socket.on("allFinished", (room) => {
       setRoom(room);
       console.log("All players finished", room);
-      findResults(room.players);
-      setGameOver(true);
+      // findResults(room.players);
+      // setGameOver(true);
     });
 
     socket.on("gameOver", (room) => {
       setRoom(room);
       console.log("Game over via time ", room);
-      findResults(room.players);
-      setGameOver(true);
+      // findResults(room.players);
+      // setGameOver(true);
     });
 
     socket.on("playerFinished", (room, player) => {

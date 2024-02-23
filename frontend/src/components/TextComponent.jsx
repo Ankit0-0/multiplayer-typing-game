@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { allAlphabets } from "../assets/data.js";
 import { myContext } from "../context/context.jsx";
-import { io } from "socket.io-client";
-import { toast } from "react-toastify";
+// import { io } from "socket.io-client";
+// import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const TextComponent = () => {
@@ -10,40 +10,35 @@ const TextComponent = () => {
 
   const navigate = useNavigate();
 
-  const {
-    countDown,
-    setCountDown,
-    startCountDown,
-    room,
-    setRoom,
-    myName,
-    socket,
-  } = myContext();
+  const { startCountDown, room, setRoom, myName, socket, myStats, setMyStats } =
+    myContext();
 
   const [currentTime, setCurrentTime] = useState(60);
-  const [index, setIndex] = useState(0);
   const [flag, setFlag] = useState(false);
-  const [errorsCount, setErrorsCount] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [totalChars, setTotalChars] = useState(0);
-  const [totalCharsTyped, setTotalCharsTyped] = useState(0);
-  const [totalErrors, setTotalErrors] = useState(0);
   const [text] = useState(room.text);
   const [alphabets] = useState(allAlphabets);
   const [countdownFinished, setCountdownFinished] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
-
   const textArea = useRef(null);
   const time = useRef(null);
   const countDownRef = useRef(null);
-  const speedRef = useRef(null);
-  const accuracyRef = useRef(null);
 
   useEffect(() => {
-    if (currentTime === 0) {
-      // Emit timeUp event to the backend
-      if (myName === room.owner) {
-        socket.emit("timeUp", room.roomId);
+    setMyStats(() => {
+      return {
+        progress: 0,
+        charactersTyped: 0,
+        finished: false,
+        finishTime: -1,
+        errors: 0,
+        index: 0,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (currentTime === 0) { 
+      if (myName === room.owner) { 
+        socket.emit("timeUp", room.roomId); // Emit timeUp event
       }
     }
   }, [currentTime]);
@@ -65,30 +60,6 @@ const TextComponent = () => {
     //   clearInterval(countDownRef.current); // Clear countdown timer
     // };
   }, []);
-
-  useEffect(() => {
-    if (gameOver) {
-      calculateScore();
-      // setGameOver(false);
-    }
-  }, [gameOver]);
-
-  const updateScores = (accuracy, speed, errors, netSpeed) => {
-    // console.log({ correctCount, errorsCount, totalChars, totalErrors });
-    speedRef.current.textContent = `speed: ${speed} rpm`;
-    accuracyRef.current.textContent = `accuracy: ${accuracy}%`;
-  };
-
-  const calculateScore = () => {
-    const accuracy = ((correctCount / totalCharsTyped) * 100).toFixed(2);
-    // const speed = (totalCharsTyped / 5 / 60).toFixed(2);
-    const speed = (totalCharsTyped / 5 / 60).toFixed(2);
-
-    const errors = totalCharsTyped - correctCount;
-    const netSpeed = speed - errors;
-    console.log({ accuracy, speed, errors, netSpeed });
-    updateScores(accuracy, speed, errors, netSpeed);
-  };
 
   const createSpans = (text) => {
     if (textArea.current) {
@@ -149,15 +120,14 @@ const TextComponent = () => {
     const spans = Array.from(textAreaChildren);
     const len = spans.length;
 
-    let currentIndex = index; // Use the latest value of index
-    // console.log({ index, correctCount, errorsCount, totalChars, totalErrors });
-
+    let currentIndex = myStats.index;
     if (currentIndex >= len) {
       console.log("Game Over");
       return;
     }
 
     let span = spans[currentIndex];
+    let event;
 
     if (alphabets.includes(key)) {
       if (key === "Backspace") {
@@ -168,29 +138,36 @@ const TextComponent = () => {
         currentIndex--;
 
         if (spans[currentIndex].classList.contains("incorrect")) {
-          setErrorsCount((prev) => prev - 1);
-        }
+          setMyStats((prev) => {
+            return { ...prev, errors: prev.errors - 1 };
+          });
 
-        if (spans[currentIndex].textContent === " ") {
-          spans[currentIndex].classList.remove("bg-red-200", "rounded");
+          if (spans[currentIndex].textContent === " ") {
+            spans[currentIndex].classList.remove("bg-red-200", "rounded");
+          }
+          event = "error -1";
         }
 
         if (spans[currentIndex].classList.contains("correct")) {
-          setCorrectCount((prev) => prev - 1);
+          event = "correct -1";
         }
 
         spans[currentIndex].classList.remove("correct", "incorrect");
         spans[currentIndex].classList.add("active");
 
         span.classList.remove("active");
-        setTotalCharsTyped((prev) => prev - 1);
+        setMyStats((prev) => {
+          return { ...prev, charactersTyped: prev.charactersTyped - 1 };
+        });
       } else if (key === span.textContent) {
         console.log("correct");
         span.classList.remove("active");
         span.classList.add("correct");
 
-        setCorrectCount((prev) => prev + 1);
-        setTotalCharsTyped((prev) => prev + 1);
+        setMyStats((prev) => {
+          return { ...prev, charactersTyped: prev.charactersTyped + 1 };
+        });
+        event = "correct +1";
 
         currentIndex++;
 
@@ -207,8 +184,14 @@ const TextComponent = () => {
         span.classList.remove("active");
         span.classList.add("incorrect");
 
-        setErrorsCount((prev) => prev + 1);
-        setTotalCharsTyped((prev) => prev + 1);
+        setMyStats((prev) => {
+          return {
+            ...prev,
+            errors: prev.errors + 1,
+            charactersTyped: prev.charactersTyped + 1,
+          };
+        });
+        event = "error +1";
         currentIndex++;
 
         if (currentIndex < len) {
@@ -217,15 +200,16 @@ const TextComponent = () => {
       }
     }
 
+    socket.emit("updateProgress", room.roomId, myName, currentIndex, event);
+
     if (currentIndex === len) {
-      // calculateScore();
       socket.emit("playerFinished", room.roomId, myName, currentTime);
       setGameOver(true);
     }
 
-    socket.emit("updateProgress", room.roomId, myName, currentIndex);
-
-    setIndex(currentIndex);
+    setMyStats((prev) => {
+      return { ...prev, index: currentIndex };
+    });
   };
 
   return (
@@ -241,9 +225,9 @@ const TextComponent = () => {
           <span className="timer" ref={time}>
             timer
           </span>
-          <span ref={speedRef}>speed 40 wpm</span>
+          {/* <span ref={speedRef}>speed 40 wpm</span> */}
 
-          <span ref={accuracyRef}>accuracy</span>
+          {/* <span ref={accuracyRef}>accuracy</span> */}
         </div>
         <p
           className="border f-[50%] border-gray-400 rounded-lg p-3 font-bold tracking-widest "

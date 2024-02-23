@@ -112,7 +112,7 @@ const Results = () => {
     fetchResults();
   }, [room.roomId]); // Add room.roomId as a dependency
 
-  console.log("Results state:", results);
+  // console.log("Results state:", results);
 
   if (!results) {
     return (
