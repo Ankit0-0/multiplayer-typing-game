@@ -16,6 +16,7 @@ const Results = () => {
             <span>Speed</span>
             <span>Accuracy</span>
             <span>Errors</span>
+            <span>penalty</span>
           </div>
           <div className="list mt-2">
             {leaderboard.map((player, index) => (
@@ -29,6 +30,7 @@ const Results = () => {
                 <div>{player.speed || 1}</div>
                 <div>{player.accuracy || 1}</div>
                 <div>{player.errors || 1}</div>
+                <div>{player.penalty || 1}</div>
               </div>
             ))}
           </div>

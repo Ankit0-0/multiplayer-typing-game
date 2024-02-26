@@ -15,7 +15,7 @@ export const ContextProvider = ({ children }) => {
   const [room, setRoom] = useState();
   const [countDown, setCountDown] = useState(-1);
   const [players, setPlayers] = useState([{}]);
-  const [myStats, setMyStats] = useState({});// Set the default value
+  const [myStats, setMyStats] = useState({}); // Set the default value
   const [gameOver, setGameOver] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
 

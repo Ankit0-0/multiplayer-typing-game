@@ -25,9 +25,20 @@ const cars = () => {
   return (
     <div className="flex flex-col justify-evenly border w-[40%] h-full">
       {room.players.map((player) => (
-        <div key={player.name}>
+        <div
+          key={player.name}
+          className="flex flex-col justify-evenly items-stretch "
+        >
+          <div className="flex justify-center">
           <p>{player.name}</p>
+          </div>
           <LinearProgress
+            sx={{
+              backgroundColor: "white",
+              color: "black",
+              height: "20px",
+              borderRadius: "10px",
+            }}
             variant="determinate"
             value={player.progress}
             className="m-4"
@@ -38,7 +49,3 @@ const cars = () => {
   );
 };
 export default cars;
-
-{
-  /* <LinearProgress sx={{height: '20px', transform: 'rotate(-90deg) translateX(-50%)'}} variant="determinate" value={progress} className="m-4" /> */
-}

@@ -2,6 +2,7 @@ import TextComponent from "./TextComponent.jsx";
 import Cars from "./Cars.jsx";
 import PopUP from "./PopUP.jsx";
 import Results from "./Results.jsx";
+import { toast } from "react-toastify";
 
 import { myContext } from "../context/context.jsx";
 import { useEffect, useState } from "react";
@@ -65,6 +66,7 @@ const Home = () => {
 
     socket.on("playerFinished", (room, player) => {
       setRoom(room);
+      toast.success(`${player} finished the game!`);
       console.log(`${player} finished the game!`);
     });
 

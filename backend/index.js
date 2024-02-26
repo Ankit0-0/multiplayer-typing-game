@@ -27,23 +27,40 @@ app.get("/results/:roomId", (req, res) => {
   const results = [];
 
   room.players.forEach((player) => {
-    const time = player.finished ? 60 - player.finishTime : 60;
-    const charsPerSec = player.charactersTyped / time;
-    const wpm = (charsPerSec * 60) / 5;
-    console.log(time, charsPerSec);
+    let time = player.finished ? 60 - player.finishTime : 60;
+
+    let speed;
+    if (!player.finished) {
+      if (player.charactersTyped === 0) {
+        speed = 0;
+        time = Number.MAX_SAFE_INTEGER;
+      } else {
+        speed = player.charactersTyped / player.finishTime;
+        const remaining = room.text.length - player.charactersTyped;
+        time = remaining / speed;
+      }
+    } else {
+      speed = player.charactersTyped / player.finishTime;
+    }
+    const wpm = (speed * 60) / 5;
+
+    time += player.errors;
+
     results.push({
       name: player.name,
-      finishTime: player.finished ? time : "DNF",
+      finishTime: time,
       errors: player.errors,
       accuracy: (
         ((player.charactersTyped - player.errors) / player.charactersTyped) *
         100
       ).toFixed(2),
       speed: wpm.toFixed(2),
+      penalty: player.errors,
     });
   });
 
-  res.json(results);
+  const winners = results.sort((a, b) => a.finishTime - b.finishTime);
+  res.json(winners);
 });
 
 const io = new Server(server, {
@@ -81,7 +98,7 @@ io.on("connection", (socket) => {
           progress: 0,
           charactersTyped: 0,
           finished: false,
-          finishTime: -1,
+          finishTime: 999,
           errors: 0,
         },
       ],
@@ -104,6 +121,12 @@ io.on("connection", (socket) => {
       if (rooms[roomId].gameStarted == true) {
         console.log("someone tried to join a busy room");
         socket.emit("roomBusy", "Game already started in this room");
+        return;
+      }
+
+      if (rooms[roomId].players.length >= 4) {
+        console.log("someone tried to join a full room");
+        socket.emit("roomBusy", "Room is full");
         return;
       }
       // Join the room
