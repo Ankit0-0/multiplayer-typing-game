@@ -3,7 +3,7 @@ import { myContext } from "../context/context";
 
 const Results = () => {
   const { room, leaderboard } = myContext();
-  const [results, setResults] = useState(null); // Initialize results state with null
+  const [results, setResults] = useState(null);
 
   return (
     <main className="font-AmaticSC bg-black min-h-screen w-screen flex justify-center items-center">
@@ -26,7 +26,11 @@ const Results = () => {
               >
                 <div>{index + 1}</div>
                 <div>{player.name || 1}</div>
-                <div>{player.finishTime || 1}</div>
+                <div>
+                  {player.finishTime === Number.MAX_SAFE_INTEGER
+                    ? "DNF"
+                    : player.finishTime || 1}
+                </div>
                 <div>{player.speed || 1}</div>
                 <div>{player.accuracy || 1}</div>
                 <div>{player.errors || 1}</div>

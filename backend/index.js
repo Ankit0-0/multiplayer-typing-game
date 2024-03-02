@@ -197,7 +197,7 @@ io.on("connection", (socket) => {
   socket.on("updateProgress", (roomId, user, index, event) => {
     // console.log("Updating progress");
     // Check if the room exists
-
+      
     if (rooms[roomId]) {
       const progress = (index / rooms[roomId].text.length) * 100;
       rooms[roomId].players.forEach((player) => {
@@ -216,7 +216,7 @@ io.on("connection", (socket) => {
           }
         }
       });
-
+       
       // Emit the updated count to all users in the room
       io.to(roomId).emit("progressUpdated", rooms[roomId]);
     }

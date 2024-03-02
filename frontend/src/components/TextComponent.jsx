@@ -6,12 +6,19 @@ import { myContext } from "../context/context.jsx";
 import { useNavigate } from "react-router-dom";
 
 const TextComponent = () => {
-  
   const navigate = useNavigate();
-  
-  const {countDown, startCountDown, room, setRoom, myName, socket, myStats, setMyStats } =
-  myContext();
-  
+
+  const {
+    countDown,
+    startCountDown,
+    room,
+    setRoom,
+    myName,
+    socket,
+    myStats,
+    setMyStats,
+  } = myContext();
+
   const [disableInput, setDisableInput] = useState(false);
   const [currentTime, setCurrentTime] = useState(63);
   const [flag, setFlag] = useState(false);
@@ -23,21 +30,19 @@ const TextComponent = () => {
   const countDownRef = useRef(null);
 
   useEffect(() => {
-    setMyStats(() => {
-      return {
-        progress: 0,
-        charactersTyped: 0,
-        finished: false,
-        finishTime: -1,
-        errors: 0,
-        index: 0,
-      };
+    setMyStats({
+      progress: 0,
+      charactersTyped: 0,
+      finished: false,
+      finishTime: -1,
+      errors: 0,
+      index: 0,
     });
   }, []);
 
   useEffect(() => {
-    if (currentTime === 0) { 
-      if (myName === room.owner) { 
+    if (currentTime === 0) {
+      if (myName === room.owner) {
         socket.emit("timeUp", room.roomId); // Emit timeUp event
       }
     }
@@ -46,14 +51,12 @@ const TextComponent = () => {
   useEffect(() => {
     if (!room) navigate("/");
     socket.on("gameStarted", (room) => {
-
       if (!flag) {
         setRoom(room);
         createSpans(text);
         setFlag(true); // Set flag to prevent multiple game starts
         setDisableInput(true); // Disable user input during countdown
-        startCountDown(3, () => {
-        });
+        startCountDown(3, () => {});
         startTimer();
         setDisableInput(false); // Re-enable user input after countdown finishes
       }
@@ -79,7 +82,7 @@ const TextComponent = () => {
       textArea.current.children[0].classList.add("active"); // Add active class to first span
     }
   };
-  
+
   const startTimer = () => {
     clearInterval(countDownRef.current);
     setCurrentTime(63);
@@ -97,22 +100,25 @@ const TextComponent = () => {
     setCountdownFinished(true);
   };
 
-
   const startGame = () => {
     if (!flag) {
       socket.emit("startGame", room.roomId);
       createSpans(text);
       setFlag(true); // Set flag to prevent multiple game starts
       setDisableInput(true); // Disable user input during countdown
-      startCountDown(3, () => {
-      });
+      startCountDown(3, () => {});
       startTimer();
       setDisableInput(false); // Re-enable user input after countdown finishes
     }
   };
 
   const handleKeyDown = (e) => {
-    if (disableInput ||   !countdownFinished || (countDown > 0 && countDown != -1)) return;
+    if (
+      disableInput ||
+      !countdownFinished ||
+      (countDown > 0 && countDown != -1)
+    )
+      return;
 
     if (currentTime <= 0) {
       // setGameOver(true);
@@ -239,6 +245,7 @@ const TextComponent = () => {
           ref={textArea}
           onKeyDown={handleKeyDown}
         ></p>
+        <input type="text" />
         {myName === room.owner && (
           <button
             className="bg-blue-500 text-white font-bold rounded-lg p-2 mt-2"
