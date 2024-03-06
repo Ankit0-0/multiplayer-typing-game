@@ -222,6 +222,20 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on('restartGame', (roomId) => {
+    if (rooms[roomId]) {
+      rooms[roomId].gameStarted = false;
+      rooms[roomId].players.forEach((player) => {
+        player.progress = 0;
+        player.charactersTyped = 0;
+        player.finished = false;
+        player.finishTime = -1;
+        player.errors = 0;
+      });
+      io.to(roomId).emit('readyToStart', rooms[roomId]);
+    }
+  });
+
   // Disconnect event
   socket.on("disconnect", () => {
     console.log("A user disconnected");

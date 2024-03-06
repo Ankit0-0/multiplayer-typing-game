@@ -25,9 +25,11 @@ const TextComponent = () => {
   const [text] = useState(room.text);
   const [alphabets] = useState(allAlphabets);
   const [countdownFinished, setCountdownFinished] = useState(false);
+
   const textArea = useRef(null);
   const time = useRef(null);
   const countDownRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     setMyStats({
@@ -59,6 +61,7 @@ const TextComponent = () => {
         startCountDown(3, () => {});
         startTimer();
         setDisableInput(false); // Re-enable user input after countdown finishes
+
       }
     });
 
@@ -86,7 +89,11 @@ const TextComponent = () => {
   const startTimer = () => {
     clearInterval(countDownRef.current);
     setCurrentTime(63);
-    time.current.textContent = currentTime;
+    // time.current.textContent = currentTime;
+    if (time.current) {
+      time.current.textContent = currentTime;
+    }
+    
     const intervalId = setInterval(() => {
       setCurrentTime((prev) => {
         if (prev <= 0) {
@@ -225,27 +232,33 @@ const TextComponent = () => {
 
   return (
     <div
-      onKeyDown={handleKeyDown}
+      // onKeyDown={handleKeyDown}
       className="w-[60%] h-full flex flex-col justify-evenly items-center"
     >
       <span>roomid: {room.roomId}</span>
       <span>myname: {myName}</span>
       <span>owner: {room.owner}</span>
-      <div className="border border-gray-500 rounded-lg p-4 h-80 w-full mt-4 flex flex-col justify-evenly">
-        <div className=" border h-[25%] w-full flex  justify-evenly">
+      <div className=" rounded-lg p-4 h-80 w-full mt-4 flex flex-col justify-evenly">
+        <div className="   w-full flex  justify-center">
           <span className="timer" ref={time}>
             timer
           </span>
-          {/* <span ref={speedRef}>speed 40 wpm</span> */}
-
-          {/* <span ref={accuracyRef}>accuracy</span> */}
         </div>
         <p
-          className="border f-[50%] border-gray-400 rounded-lg p-3 font-bold tracking-widest "
+          className=" f-[50%] border-gray-400 rounded-lg p-3 font-bold tracking-widest"
           ref={textArea}
-          onKeyDown={handleKeyDown}
+          // onKeyDown={handleKeyDown}
         ></p>
-        <input type="text" />
+        {countdownFinished && (
+          <input
+            type="text"
+            onKeyDown={handleKeyDown}
+            placeholder= {`${room.text.substring(0, 17)}....`}
+            className="rounded h-10 border-white p-4"
+            // ref={inputRef}
+            autoFocus
+          />
+        )}
         {myName === room.owner && (
           <button
             className="bg-blue-500 text-white font-bold rounded-lg p-2 mt-2"
