@@ -115,11 +115,13 @@ const TextComponent = () => {
   };
 
   const handleKeyDown = (e) => {
-    // console.log("keydown");
-    if (!countdownFinished || (countDown > 0 && countDown != -1)) return;
+    if (!countdownFinished || (countDown > 0 && countDown != -1)) {
+      e.preventDefault();
+      return;
+    } 
 
     // if (currentTime <= 0) {
-    //   // setGameOver(true);
+    //   setGameOver(true);
     //   return;
     // }
 
@@ -142,7 +144,11 @@ const TextComponent = () => {
       if (e.key === "Backspace" && e.ctrlKey) {
         // Prevent the default behavior of the event
         e.preventDefault();
-        toast.error("Ctrl + Backspace is disabled!");
+        toast.dismiss();
+        toast.error("Ctrl + Backspace is disabled!", {
+          autoClose: 1000,
+          position: "top-center",
+        });
         return;
       }
       if (key === "Backspace") {
@@ -175,7 +181,7 @@ const TextComponent = () => {
           return { ...prev, charactersTyped: prev.charactersTyped - 1 };
         });
       } else if (key === span.textContent) {
-        console.log("correct");
+        // console.log("correct");
         span.classList.remove("active");
         span.classList.add("correct");
 
