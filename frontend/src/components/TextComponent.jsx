@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { allAlphabets } from "../assets/data.js";
 import { myContext } from "../context/context.jsx";
-// import { io } from "socket.io-client";
-
+import { toast } from "react-toastify";
+   
 import { useNavigate } from "react-router-dom";
-
+    
 const TextComponent = () => {
   const navigate = useNavigate();
-
+    
   const {
     countDown,
     startCountDown,
@@ -19,7 +19,6 @@ const TextComponent = () => {
     setMyStats,
   } = myContext();
 
-  const [disableInput, setDisableInput] = useState(false);
   const [currentTime, setCurrentTime] = useState(63);
   const [flag, setFlag] = useState(false);
   const [text] = useState(room.text);
@@ -57,11 +56,8 @@ const TextComponent = () => {
         setRoom(room);
         createSpans(text);
         setFlag(true); // Set flag to prevent multiple game starts
-        setDisableInput(true); // Disable user input during countdown
         startCountDown(3, () => {});
         startTimer();
-        setDisableInput(false); // Re-enable user input after countdown finishes
-
       }
     });
 
@@ -93,7 +89,7 @@ const TextComponent = () => {
     if (time.current) {
       time.current.textContent = currentTime;
     }
-    
+
     const intervalId = setInterval(() => {
       setCurrentTime((prev) => {
         if (prev <= 0) {
@@ -112,25 +108,20 @@ const TextComponent = () => {
       socket.emit("startGame", room.roomId);
       createSpans(text);
       setFlag(true); // Set flag to prevent multiple game starts
-      setDisableInput(true); // Disable user input during countdown
+
       startCountDown(3, () => {});
       startTimer();
-      setDisableInput(false); // Re-enable user input after countdown finishes
     }
   };
 
   const handleKeyDown = (e) => {
-    if (
-      disableInput ||
-      !countdownFinished ||
-      (countDown > 0 && countDown != -1)
-    )
-      return;
+    // console.log("keydown");
+    if (!countdownFinished || (countDown > 0 && countDown != -1)) return;
 
-    if (currentTime <= 0) {
-      // setGameOver(true);
-      return;
-    }
+    // if (currentTime <= 0) {
+    //   // setGameOver(true);
+    //   return;
+    // }
 
     const key = e.key;
 
@@ -148,6 +139,12 @@ const TextComponent = () => {
     let event;
 
     if (alphabets.includes(key)) {
+      if (e.key === "Backspace" && e.ctrlKey) {
+        // Prevent the default behavior of the event
+        e.preventDefault();
+        toast.error("Ctrl + Backspace is disabled!");
+        return;
+      }
       if (key === "Backspace") {
         if (currentIndex === 0) {
           return;
@@ -253,8 +250,8 @@ const TextComponent = () => {
           <input
             type="text"
             onKeyDown={handleKeyDown}
-            placeholder= {`${room.text.substring(0, 17)}....`}
-            className="rounded h-10 border-white p-4"
+            placeholder={`${room.text.substring(0, 17)}....`}
+            className="rounded h-10 border-white p-4 f-[50%] tracking-widest font-bold"
             // ref={inputRef}
             autoFocus
           />
