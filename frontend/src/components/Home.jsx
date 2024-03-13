@@ -41,7 +41,7 @@ const Home = () => {
     });
 
     const fetchResults = async () => {
-      const res = await fetch(`http://localhost:3000/results/${room.roomId}`);
+      const res = await fetch(`https://multiplayer-typing-game-ch14.onrender.com/results/${room.roomId}`);
       const data = await res.json();
       setLeaderboard(data);
     }

@@ -8,7 +8,7 @@ const Landing = () => {
   const [roomId, setRoomId] = useState("");
 
   useEffect(() => {
-    const socket = io("http://localhost:3000");
+    const socket = io("https://multiplayer-typing-game-ch14.onrender.com");
     setSocket(socket);
 
     socket.on("connect", () => {
