@@ -1,0 +1,25 @@
+{
+  "name": "typeracer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install-server": "cd backend && npm install",
+    "start-server": "cd backend && npm start",
+    "install-client": "cd frontend && npm install",
+    "build-client": "cd frontend && npm run build",
+    "start-client": "cd frontend && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ankit0-0/multiplayer-typing-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ankit0-0/multiplayer-typing-game/issues"
+  },
+  "homepage": "https://github.com/Ankit0-0/multiplayer-typing-game#readme"
+}
