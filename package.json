@@ -9,7 +9,7 @@
     "start-server": "cd backend && npm start",
     "install-client": "cd frontend && npm install",
     "build-client": "cd frontend && npm run build",
-    "start-client": "cd frontend && npm start"
+    "start-client": "cd frontend && npm run dev"
   },
   "repository": {
     "type": "git",
