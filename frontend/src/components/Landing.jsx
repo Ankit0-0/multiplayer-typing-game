@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 const Landing = () => {
   const { myName, setMyName, socket, setSocket, room, setRoom } = myContext();
   const [roomId, setRoomId] = useState("");
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     const socket = io("https://multiplayer-typing-game-server.onrender.com");
@@ -13,28 +14,27 @@ const Landing = () => {
 
     socket.on("connect", () => {
       console.log("Connected to the server");
+      setConnected(true);
     });
 
     socket.on("nameTaken", (msg) => {
       toast.error(msg);
       console.log(msg);
-    })
+    });
 
-    
     socket.on("roomBusy", (msg) => {
       toast.error(msg);
       console.log(msg);
-    })
+    });
 
     socket.on("roomNotFound", (msg) => {
       toast.error(msg);
       console.log(msg);
-    })
-
+    });
 
     socket.on("roomCreated", (room) => {
       console.log("room cerated", room);
-      setRoom(room)
+      setRoom(room);
       navigate("/home");
     });
 
@@ -56,19 +56,25 @@ const Landing = () => {
       toast.error("Please enter room id");
       return;
     }
+    if (!connected) {
+      toast.error("Free tier hosting may result in server sleep. Contact developer to access the app.");
+      return;
+    }
 
     socket.emit("joinRoom", roomId, myName);
-
   };
   const createRoom = () => {
     if (myName === "") {
       toast.error("Please enter your name");
       return;
     }
+    if (!connected) {
+      toast.error("Free tier hosting may result in server sleep. Contact developer to  access the  app.");
+      return;
+    }
     console.log("create room");
 
     socket.emit("createRoom", myName);
-
   };
 
   return (
