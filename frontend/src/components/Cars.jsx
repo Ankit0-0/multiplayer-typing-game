@@ -1,12 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import LinearProgress from "@mui/material/LinearProgress";
 import { myContext } from "../context/context";
-import { io } from "socket.io-client";
-// import { useNavigate } from "react-router-dom";
 
-const cars = () => {
-  // const navigate = useNavigate();
-  const [progress, setProgress] = useState(50);
+const Cars = () => {
   const { room, socket, setRoom } = myContext();
 
   useEffect(() => {
@@ -15,22 +11,16 @@ const cars = () => {
       return null;
     }
     socket.on("progressUpdated", (room) => {
-      // console.log("Progress updated", room);
       setRoom(room);
     });
   }, []);
 
-  const players = room.players;
-
   return (
-    <div className="flex flex-col justify-evenly border w-[40%] h-full">
+    <div className="flex flex-col justify-evenly w-full max-w-xl p-6 mx-auto bg-gray-900 text-white rounded-lg shadow-xl border border-gray-700">
       {room.players.map((player) => (
-        <div
-          key={player.name}
-          className="flex flex-col justify-evenly items-stretch "
-        >
-          <div className="flex justify-center">
-          <p>{player.name}</p>
+        <div key={player.name} className="mb-6">
+          <div className="flex justify-center mb-2">
+            <p className="text-lg font-bold">{player.name}</p>
           </div>
           <LinearProgress
             sx={{
@@ -48,4 +38,5 @@ const cars = () => {
     </div>
   );
 };
-export default cars;
+
+export default Cars;

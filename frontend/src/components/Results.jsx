@@ -10,20 +10,6 @@ const Results = () => {
   const isOwner = room.owner === myName;
 
   useEffect(() => {
-    // const fetchResults = async () => {
-    //   const results = await fetch("http://localhost:3000/results", {
-    //     method: "GET",
-    //     headers: {
-    //       "content-type": "application/json",
-    //     },
-    //   });
-
-    //   fetchResults();
-    //   const data = await results.json();
-    //   console.log("data => ", data);
-    //   setResults(data);
-    // };
-
     socket.on("readyToStart", async (room) => {
       await setRoom(room);
       navigate("/home");
@@ -32,49 +18,52 @@ const Results = () => {
 
   return (
     <main className="font-AmaticSC bg-black min-h-screen w-screen flex flex-col justify-center items-center">
-      <section className="container bg-black mx-auto p-4  shadow-lg  border-b-2 border-dashed">
-        <div className="playerslist mt-8 overflow-x-auto">
-          <div className="w-full grid grid-cols-8 gap-2 text-center">
-            <div className="">#</div>
-            <span>Name</span>
-            <span>Final Score</span>
-            <span>Finish Time</span>
-            <span>Speed</span>
-            <span>Accuracy</span>
-            <span>Errors</span>
-            <span>penalty</span>
+      <section className="container bg-gray-800 mx-auto p-8 rounded-lg shadow-lg border-b-4 border-dashed border-gray-600">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl text-white">Leaderboard</h1>
+        </div>
+        <div className="playerslist overflow-x-auto">
+          <div className="w-full grid grid-cols-8 gap-4 text-center bg-gray-700 text-white py-2 rounded-t-lg">
+            <div>#</div>
+            <div>Name</div>
+            <div>Final Score</div>
+            <div>Finish Time</div>
+            <div>Speed</div>
+            <div>Accuracy</div>
+            <div>Errors</div>
+            <div>Penalty</div>
           </div>
           <div className="list mt-2">
             {leaderboard.map((player, index) => (
               <div
                 key={index}
-                className="w-full grid grid-cols-8 gap-2 text-center"
+                className={`w-full grid grid-cols-8 gap-4 text-center py-2 ${
+                  index % 2 === 0 ? "bg-gray-600" : "bg-gray-700"
+                } text-white rounded-lg mb-2`}
               >
                 <div>{index + 1}</div>
-                <div>{player.name || 1}</div>
-                <div>{player.finalScore || 1}</div>
-                <div>
-                  {player.didNotFinish ? "DNF" : (player.finishTime || 1)}
-                </div>
-                <div>{player.speed || 1}</div>
-                <div>{player.accuracy || 1}</div>
-                <div>{player.errors || 1}</div>
-                <div>{player.penalty || 1}</div>
+                <div>{player.name}</div>
+                <div>{player.finalScore}</div>
+                <div>{player.didNotFinish ? "DNF" : player.finishTime}</div>
+                <div>{player.speed}</div>
+                <div>{player.accuracy}</div>
+                <div>{player.errors}</div>
+                <div>{player.penalty}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
       {isOwner && (
-        <section>
-          <div className="flex justify-center mt-8">
+        <section className="mt-8">
+          <div className="flex justify-center">
             <button
               onClick={async () => {
                 await socket.emit("restartGame", room.roomId);
               }}
-              className="p-2 bg-gray-800 text-white rounded-lg"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition duration-300"
             >
-              restart
+              Restart
             </button>
           </div>
         </section>
@@ -84,5 +73,3 @@ const Results = () => {
 };
 
 export default Results;
-
-// add conditional rendering to the restart button

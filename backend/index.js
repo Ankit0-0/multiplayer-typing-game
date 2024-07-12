@@ -18,50 +18,7 @@ app.use((req, res, next) => {
 
 const rooms = {};
 
-// app.get("/results/:roomId", (req, res) => {
-//   const roomId = req.params.roomId;
-//   const room = rooms[roomId];
-//   if (!room) {
-//     return res.status(404).json({ message: "Room not found" });
-//   }
-//   const results = [];
 
-//   room.players.forEach((player) => {
-//     let time = player.finished ? 60 - player.finishTime : 60;
-
-//     let speed;
-//     if (!player.finished) {
-//       if (player.charactersTyped === 0) {
-//         speed = 0;
-//         time = Number.MAX_SAFE_INTEGER;
-//       } else {
-//         speed = player.charactersTyped / player.finishTime;
-//         const remaining = room.text.length - player.charactersTyped;
-//         time = remaining / speed;
-//       }
-//     } else {
-//       speed = player.charactersTyped / player.finishTime;
-//     }
-//     const wpm = (speed * 60) / 5;
-
-//     time += player.errors;
-
-//     results.push({
-//       name: player.name,
-//       finishTime: time,
-//       errors: player.errors,
-//       accuracy: (
-//         ((player.charactersTyped - player.errors) / player.charactersTyped) *
-//         100
-//       ).toFixed(2),
-//       speed: wpm.toFixed(2),
-//       penalty: player.errors,
-//     });
-//   });
-
-//   const winners = results.sort((a, b) => a.finishTime - b.finishTime);
-//   res.json(winners);
-// });
 app.get("/results/:roomId", (req, res) => {
   const roomId = req.params.roomId;
   const room = rooms[roomId];
