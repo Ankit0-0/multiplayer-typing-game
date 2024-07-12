@@ -19,6 +19,62 @@ app.use((req, res, next) => {
 const rooms = {};
 
 
+// app.get("/results/:roomId", (req, res) => {
+//   const roomId = req.params.roomId;
+//   const room = rooms[roomId];
+//   if (!room) {
+//     return res.status(404).json({ message: "Room not found" });
+//   }
+//   const results = [];
+
+//   // Define weights for each parameter
+//   const weightSpeed = 0.2;
+//   const weightAccuracy = 0.8;
+//   const weightFinishTime = 0.2;
+//   const weightPenalty = 0.1;
+
+//   room.players.forEach((player) => {
+//     let finishTime = player.finished ? player.finishTime : 60; // Time in seconds
+//     let charactersTyped = player.charactersTyped;
+//     let errors = player.errors;
+//     let accuracy = ((charactersTyped - errors) / charactersTyped) * 100;
+//     let speed = (charactersTyped / 5) / (finishTime / 60); // WPM
+
+//     // if (!player.finished) {
+//     //   // Apply a penalty for not finishing
+//     //   finishTime = 60 + (60 - player.finishTime);
+//     // }
+
+//     // Penalty for errors
+//     let penalty = errors * 2;
+
+//     finishTime = Math.abs(60 - finishTime);
+
+//     // Calculate the final score
+//     let finalScore = 
+//       (weightSpeed * speed) +
+//       (weightAccuracy * accuracy) -
+//       (weightFinishTime * finishTime) -
+//       (weightPenalty * penalty);
+
+//     results.push({
+//       name: player.name,
+//       finishTime: finishTime,
+//       errors: errors,
+//       accuracy: accuracy.toFixed(2),
+//       speed: speed.toFixed(2),
+//       penalty: penalty,
+//       finalScore: finalScore.toFixed(2),
+//       didNotFinish: !player.finished
+//     });
+//   });
+
+//   // Sort results by finalScore (descending order)
+//   results.sort((a, b) => b.finalScore - a.finalScore);
+//   console.log(results);
+//   res.json(results);
+// });
+
 app.get("/results/:roomId", (req, res) => {
   const roomId = req.params.roomId;
   const room = rooms[roomId];
@@ -28,8 +84,8 @@ app.get("/results/:roomId", (req, res) => {
   const results = [];
 
   // Define weights for each parameter
-  const weightSpeed = 0.2;
-  const weightAccuracy = 0.8;
+  const weightSpeed = 0.4;
+  const weightAccuracy = 0.4;
   const weightFinishTime = 0.2;
   const weightPenalty = 0.1;
 
@@ -40,15 +96,8 @@ app.get("/results/:roomId", (req, res) => {
     let accuracy = ((charactersTyped - errors) / charactersTyped) * 100;
     let speed = (charactersTyped / 5) / (finishTime / 60); // WPM
 
-    // if (!player.finished) {
-    //   // Apply a penalty for not finishing
-    //   finishTime = 60 + (60 - player.finishTime);
-    // }
-
     // Penalty for errors
     let penalty = errors * 2;
-
-    finishTime = Math.abs(60 - finishTime);
 
     // Calculate the final score
     let finalScore = 
@@ -70,8 +119,8 @@ app.get("/results/:roomId", (req, res) => {
   });
 
   // Sort results by finalScore (descending order)
-  results.sort((a, b) => b.finalScore - a.finalScore);
-  console.log(results);
+  results.sort((a, b) => b.finalScore - a.finalScore || a.finishTime - b.finishTime);
+  
   res.json(results);
 });
 
