@@ -10,6 +10,20 @@ const Results = () => {
   const isOwner = room.owner === myName;
 
   useEffect(() => {
+    // const fetchResults = async () => {
+    //   const results = await fetch("http://localhost:3000/results", {
+    //     method: "GET",
+    //     headers: {
+    //       "content-type": "application/json",
+    //     },
+    //   });
+
+    //   fetchResults();
+    //   const data = await results.json();
+    //   console.log("data => ", data);
+    //   setResults(data);
+    // };
+
     socket.on("readyToStart", async (room) => {
       await setRoom(room);
       navigate("/home");
@@ -23,6 +37,7 @@ const Results = () => {
           <div className="w-full grid grid-cols-8 gap-2 text-center">
             <div className="">#</div>
             <span>Name</span>
+            <span>Final Score</span>
             <span>Finish Time</span>
             <span>Speed</span>
             <span>Accuracy</span>
@@ -37,10 +52,9 @@ const Results = () => {
               >
                 <div>{index + 1}</div>
                 <div>{player.name || 1}</div>
+                <div>{player.finalScore || 1}</div>
                 <div>
-                  {player.finishTime === Number.MAX_SAFE_INTEGER
-                    ? "DNF"
-                    : player.finishTime || 1}
+                  {player.didNotFinish ? "DNF" : (player.finishTime || 1)}
                 </div>
                 <div>{player.speed || 1}</div>
                 <div>{player.accuracy || 1}</div>
