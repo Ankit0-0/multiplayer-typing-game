@@ -11,7 +11,7 @@ const Landing = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const socket = io("localhost:3000");
+    const socket = io("https://multiplayer-typing-game-server.onrender.com");
     setSocket(socket);
 
     socket.on("connect", () => {
